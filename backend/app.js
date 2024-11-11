@@ -1,5 +1,6 @@
 const express = require("express");
 const jwt = require("jsonwebtoken");
+const cors = require("cors");
 const app = express();
 const PORT = process.env.PORT || 3000;
 const JWT_SECRET = "ABFISDBISDBVOSDINVOISDVHOBV";
@@ -13,6 +14,11 @@ function createDummyUsers(){
             password: `password-${i}`
         })
     }
+}
+
+const requestLogger = (req, res, next) => {
+    console.log(`${req.method} request on uri: ${req.originalUrl}`);
+    next()
 }
 
 const checkUser = (req, res, next) => {
@@ -61,16 +67,17 @@ const verifyToken = (req, res, next) => {
 }
 
 app.use(express.json());
+app.use(cors());
+app.use(requestLogger);
 app.get('/', (req, res) => {
-    res.status(200).json({
-        msg: "Welcome to music app"
-    })
+    res.sendFile("/Users/ashishyadav/Documents/GitHub/music-app/frontend/public/index.html")
 })
+
+app.get('/about', (req, res) => {res.status(200).json({msg: "Welcome to music app"})})
 
 app.post('/signup', checkUser, (req, res) => {
     const user = req.body;
     userDb.push(user);
-    console.log(userDb);
     res.status(200).json({
         msg: "User has been signed up 🚀"
     })
